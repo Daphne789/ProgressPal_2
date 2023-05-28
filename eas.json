@@ -1,0 +1,11 @@
+{
+    "build": {
+      "your-build-profile": {
+        "releaseChannel": "progresspal"
+      },
+      "staging": {
+        "releaseChannel": "staging"
+      }
+    }
+  }
+  

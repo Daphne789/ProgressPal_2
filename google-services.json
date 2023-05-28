@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "154626395460",
+    "project_id": "progresspal-6c906",
+    "storage_bucket": "progresspal-6c906.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:154626395460:android:1686210852f4b6f76a9b11",
+        "android_client_info": {
+          "package_name": "com.orbital.progresspal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "154626395460-ultaatb3knspklm07thuqavbkbovtngq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBL8l0Ixzo4rHc6TXi4izzj6mFScz2bTbE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "154626395460-ultaatb3knspklm07thuqavbkbovtngq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
