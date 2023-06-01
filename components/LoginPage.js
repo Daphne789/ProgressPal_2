@@ -11,7 +11,7 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
-  // const [passwordError, setPasswordError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   const handleLogin = () => {
     const auth = getAuth();
@@ -25,8 +25,28 @@ const LoginPage = () => {
       })
       .catch((error) => {
         // Handle login error
-        console.log('Login failed', error.message);
+        console.log('Login failed', error.code, error.message);
+        if (error.code === 'auth/user-not-found') {
+          setEmailError('Incorrect email');
+        } else if (error.code === 'auth/wrong-password') {
+          setPasswordError('Incorrect password');
+        } else {
+          // Reset error messages for other errors
+          setEmailError('');
+          setPasswordError('');
+          console.log('Login failed. Please try again.');
+        }
       });
+  };
+
+  const handleEmailChange = (text) => {
+    setEmail(text);
+    setEmailError(''); // Reset email error when email changes
+  };
+
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    setPasswordError(''); // Reset password error when password changes
   };
 
   return (
@@ -38,7 +58,7 @@ const LoginPage = () => {
           placeholder="Email"
           autoFocus
           maxLength={255}
-          onChangeText={setEmail}
+          onChangeText={handleEmailChange}
         />
         {emailError ? <Text style={styles.error}>{emailError}</Text> : null}
       </View>
@@ -48,8 +68,9 @@ const LoginPage = () => {
           placeholder="Password"
           secureTextEntry
           minLength={8}
-          onChangeText={setPassword}
+          onChangeText={handlePasswordChange}
         />
+        {passwordError ? <Text style={styles.error}>{passwordError}</Text> : null}
       </View>
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Log in</Text>
@@ -101,6 +122,10 @@ const styles = StyleSheet.create({
   },
   copy: {
     color: 'grey',
+  },
+  error: {
+    color: 'red',
+    marginTop: 8,
   },
 });
 
