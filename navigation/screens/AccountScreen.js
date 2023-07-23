@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Switch, SafeAreaView, Modal, ActivityIndicator, Image } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Modal, ActivityIndicator, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getAuth, signOut } from 'firebase/auth';
-import EditProfile from '../../components/EditProfile';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { firestore } from '../../config/firebase';
 
 export default function AccountScreen() {
   const navigation = useNavigation();
-  const [switchValue, setSwitchValue] = useState(false);
   const [showError, setShowError] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
   const [currentUsername, setCurrentUsername] = useState('');
   const [usernameModalVisible, setUsernameModalVisible] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
   const [tempUsername, setTempUsername] = useState('');
 
   useEffect(() => {
@@ -53,14 +49,6 @@ export default function AccountScreen() {
       });
   };
 
-  const toggleSwitch = () => {
-    setSwitchValue((prevValue) => !prevValue);
-  };
-
-  const handleEditProfilePicture = () => {
-    setModalVisible(true);
-  };
-
   const dismissErrorMessage = () => {
     setShowError(false);
   };
@@ -89,11 +77,6 @@ export default function AccountScreen() {
     }
   };
 
-  const handleImageSelect = (image) => {
-    setSelectedImage(image);
-    setModalVisible(false); 
-  };
-
   const handleOpenChangeUsername = () => {
     setTempUsername(currentUsername);
     setUsernameModalVisible(true);
@@ -105,11 +88,10 @@ export default function AccountScreen() {
 
   return (
     <View style={styles.container}>
-      <View>
-        {/* Display the default profile picture */}
+      <View style={styles.topContainer}>
         <View style={styles.profilePicContainer}>
           <Image
-            source={require('../../assets/profiles/hello.png')}
+            source={require('../../assets/hello.png')}
             style={styles.profilePic}
             PlaceholderContent={<ActivityIndicator />}
           />
@@ -117,37 +99,11 @@ export default function AccountScreen() {
         <Text style={styles.username}>{currentUsername}</Text>
       </View>
       <Text style={styles.title}>Profile</Text>
-      <TouchableOpacity onPress={handleEditProfilePicture}>
-        <Text style={styles.functionality}>Edit profile picture</Text>
-      </TouchableOpacity>
-      <View style={styles.lineStyle} />
       <Text style={styles.functionality} onPress={handleOpenChangeUsername}>Change username</Text>
-      <Text style={styles.title}>Push Notifications</Text>
-      <Text style={styles.functionality}>Receive reminders notifications</Text>
       <View style={styles.lineStyle} />
-      <SafeAreaView style={{ flex: 1 }}>
-        <View style={styles.switch}>
-          <Text>{switchValue ? 'Switch is ON' : 'Switch is OFF'}</Text>
-          {/* Setting the default value of state
-          On change of switch onValueChange will be triggered */}
-          <Switch
-            style={{ marginTop: -67 }}
-            onValueChange={toggleSwitch}
-            value={switchValue}
-          />
-        </View>
-      </SafeAreaView>
       <TouchableOpacity style={styles.button} onPress={handleLogout}>
         <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
-
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <EditProfile onClose={() => setModalVisible(false)} onSelectImage={handleImageSelect} />
-      </Modal>
 
       <Modal
         visible={usernameModalVisible}
@@ -186,10 +142,10 @@ export default function AccountScreen() {
 const styles = StyleSheet.create({
   button: {
     backgroundColor: '#ff0000',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 7,
     borderRadius: 60,
-    marginTop: 30,
+    marginTop: 10,
     marginLeft: 10,
     marginRight: 10,
     alignItems: 'center',
@@ -220,11 +176,8 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   profilePic: {
-    width: '100%',
-    height: '100%',
-  },
-  switch: {
-    flexDirection: 'column',
+    width: 160,
+    height: 160,
   },
   title: {
     fontSize: 24,
@@ -239,13 +192,19 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginHorizontal: 10,
   },
+  container: {
+    flex: 1,
+  },
+  topContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   profilePicContainer: {
     width: 160,
     height: 160,
     borderRadius: 80,
     overflow: 'hidden',
-    marginLeft: 85,
-    marginTop: 15,
+    marginTop: 20,
   },
   modalContainer: {
     flex: 1,

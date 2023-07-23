@@ -5,7 +5,6 @@ import { useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
-import { Ionicons } from '@expo/vector-icons';
 import { SearchBar } from 'react-native-elements';
 import LabelIcon from '../../assets/icons/LabelIcon';
 import ReloadIcon from '../../assets/icons/ReloadIcon';
@@ -16,6 +15,8 @@ import { firestore, auth } from '../../config/firebase';
 import { collection, query, getDocs, deleteDoc, doc, orderBy, updateDoc, getFirestore, getDoc, setDoc, where, createdBy } from 'firebase/firestore';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { format } from 'date-fns';
+import CalendarIcon from '../../assets/icons/CalendarIcon';
+import TagIcon from '../../assets/icons/TagIcon';
 
 const color = '#000000';
 const size = 30;
@@ -482,26 +483,24 @@ const HomeScreen = () => {
     return (
       <Modal visible={editModalVisible} animationType="slide">
         <View style={styles.editModalContainer}>
-          <View style={styles.iconContainer}>
+          <View style={styles.topContainer}>
             <TouchableOpacity onPress={showDatePickerModal}>
-              <Ionicons name="md-calendar" size={33} color="black" style={styles.icon} />
+              <CalendarIcon color={color} size={33}/>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setShowDropdown(true)}>
-              <Ionicons name="ios-pricetag" size={33} color="black" style={styles.icon} />
+              <TagIcon color={color} size={40}/>
             </TouchableOpacity>
-            <View style={styles.deadlineContainer}>
-              <View style={{ flexDirection: 'column', justifyContent: 'space-between' }}>
-                {editTaskSelectedDate ? (
-                  <Text style={styles.deadline}>{moment(editTaskSelectedDate).format('MMM DD, YYYY HH:mm')}</Text>
-                ) : (
-                  null
-                )}
-                {editTaskSelectedLabel ? (
-                  <Text style={styles.selectedLabel}>{editTaskSelectedLabel}</Text>
-                ) : (
-                  null
-                )}
-              </View>
+            <View style={{ flexDirection: 'column', justifyContent: 'space-between'}}>
+              {editTaskSelectedDate ? (
+                <Text style={styles.deadline}>{moment(editTaskSelectedDate).format('MMM DD, YYYY HH:mm')}</Text>
+              ) : (
+                null
+              )}
+              {editTaskSelectedLabel ? (
+                <Text style={styles.selectedLabel}>{editTaskSelectedLabel}</Text>
+              ) : (
+                null
+              )}
             </View>
           </View>
           <TextInput
@@ -822,7 +821,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     elevation: 2,
-    // position: 'relative',
   },
   labelContainer: {
     flexDirection: 'row',
@@ -866,7 +864,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    // marginRight: 90,
   },
   selectedStyle: {
     flexDirection: 'row',
@@ -890,10 +887,6 @@ const styles = StyleSheet.create({
   selectedTextStyle: {
     fontSize: 20,
   },
-  shareIconContainer: {
-    // alignSelf: 'flex-end',
-    // marginLeft: 80,
-  },
   textSelectedStyle: {
     marginRight: 5,
     fontSize: 16,
@@ -903,25 +896,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 10,
   },
-  iconContainer: {
+  topContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'space-around',
     marginBottom: 16,
     marginTop: 35,
   },
-  deadlineContainer: {
-    marginBottom: 2,
-  },
   deadline: {
     fontSize: 16,
-    marginLeft: 'auto',
-    marginRight: 8,
+    alignItems: 'flex-end'
   },
   selectedLabel: {
     fontSize: 16,
-    marginLeft: 'auto',
-    marginRight: 5,
+    alignItems: 'flex-end',
     color: 'blue',
+
   },
   titleInput: {
     borderWidth: 1,
@@ -942,9 +931,6 @@ const styles = StyleSheet.create({
     height: 160,
     textAlignVertical: 'top',
     backgroundColor: '#faebd7'
-  },
-  icon: {
-    marginRight: 16,
   },
   editModalContainer: {
     flex: 1,

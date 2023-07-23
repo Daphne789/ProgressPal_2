@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 const LoginPage = () => {
-
   const navigation = useNavigation();
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -49,7 +47,13 @@ const LoginPage = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Log In</Text>
+      <View style={styles.profilePicContainer}>
+        <Image
+          source={require('../assets/progresspalLogo.png')}
+          style={styles.profilePic}
+          PlaceholderContent={<ActivityIndicator />}
+        />
+      </View>
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -124,6 +128,14 @@ const styles = StyleSheet.create({
   error: {
     color: 'red',
     marginTop: 8,
+  },
+  profilePic: {
+    width: 100,
+    height: 100,
+  },
+  profilePicContainer: {
+    width: 100,
+    height: 100,
   },
 });
 

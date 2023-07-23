@@ -8,16 +8,16 @@ import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
 import { firestore, auth } from '../../config/firebase';
 import * as Updates from 'expo-updates';
 import { format } from 'date-fns';
+import CalendarIcon from '../../assets/icons/CalendarIcon';
+import TagIcon from '../../assets/icons/TagIcon';
 
 export default function CreateScreen() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [checkboxTexts, setCheckboxTexts] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedOption, setSelectedOption] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
-  const [checkboxes, setCheckboxes] = useState([]);
   const [selectedLabel, setSelectedLabel] = useState(null);
   const navigation = useNavigation();
   const [taskId, setTaskId] = useState('');
@@ -58,7 +58,7 @@ export default function CreateScreen() {
 
   const saveTask = async () => {
     try {
-      if (title.trim() || description.trim() || checkboxes.some((checkbox) => checkbox.text.trim())) {
+      if (title.trim() || description.trim()) {
         const userDocRef = doc(db, 'users', user.uid);
         const tasksRef = collection(userDocRef, 'tasks');
         const newTaskRef = doc(tasksRef);
@@ -68,7 +68,7 @@ export default function CreateScreen() {
         const newTask = {
           taskId: newTaskId,
           userId: user.uid,
-          createdBy: user.email, 
+          createdBy: user.email,
           title: title.trim(),
           description: description.trim(),
           selectedDate: selectedDate ? selectedDate.toISOString() : null,
@@ -102,22 +102,20 @@ export default function CreateScreen() {
     <KeyboardAvoidingView
       style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.iconContainer}>
+        <View style={styles.topContainer}>
           <TouchableOpacity onPress={showDatePickerModal}>
-            <Ionicons name="md-calendar" size={33} color="black" style={styles.icon} />
+            <CalendarIcon color={color} size={33}/>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setShowDropdown(true)}>
-            <Ionicons name="ios-pricetag" size={33} color="black" style={styles.icon} />
+            <TagIcon color={color} size={40} style={styles.icon} />
           </TouchableOpacity>
-          <View style={styles.deadlineContainer}>
-            <View style={{ flexDirection: 'column', justifyContent: 'space-between' }}>
-              {selectedDate && (
-                <Text style={styles.deadline}>{moment(selectedDate).format('MMM DD, YYYY HH:mm')}</Text>
-              )}
-              {selectedLabel && (
-                <Text style={styles.selectedLabel}>{selectedLabel}</Text>
-              )}
-            </View>
+          <View style={{ flexDirection: 'column', justifyContent: 'space-between' }}>
+            {selectedDate && (
+              <Text style={styles.deadline}>{moment(selectedDate).format('MMM DD, YYYY HH:mm')}</Text>
+            )}
+            {selectedLabel && (
+              <Text style={styles.selectedLabel}>{selectedLabel}</Text>
+            )}
           </View>
         </View>
         <TextInput
@@ -197,18 +195,18 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
   },
-  iconContainer: {
+  topContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'space-around',
     marginBottom: 16,
+    marginTop: 12,
   },
   icon: {
-    marginRight: 16,
+    marginLeft: 90,
   },
   deadline: {
     fontSize: 16,
-    marginLeft: 'auto',
-    marginRight: 8,
+    marginLeft: 50,
   },
   titleInput: {
     borderWidth: 1,
@@ -267,9 +265,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 8,
     color: 'black',
-  },
-  deadlineContainer: {
-    marginBottom: 2,
   },
   selectedLabel: {
     fontSize: 16,

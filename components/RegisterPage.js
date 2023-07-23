@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, addDoc  } from 'firebase/firestore';
+import { doc, setDoc, addDoc } from 'firebase/firestore';
 import { auth, firestore, collection } from '../config/firebase';
 import axios from 'axios';
 
@@ -79,17 +79,16 @@ const RegisterPage = () => {
       const url = `https://api.mailboxvalidator.com/v1/validation/single?email=${encodeURIComponent(
         email
       )}&key=${apiKey}`;
-  
+
       const response = await axios.get(url);
       const data = response.data;
-  
+
       if (data.error) {
         console.log('Email validation error:', data.error_message);
         return false;
       }
-  
       console.log('Validation result:', data);
-  
+
       if (data.status === 'True') {
         setEmailError('');
         return true;
@@ -102,7 +101,7 @@ const RegisterPage = () => {
       throw error;
     }
   };
-  
+
   const renderUsernameError = () => {
     if (username.length >= 10) {
       return <Text style={styles.error}>Username can't be longer than 10 characters</Text>;
@@ -143,7 +142,13 @@ const RegisterPage = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Register</Text>
+      <View style={styles.profilePicContainer}>
+        <Image
+          source={require('../assets/progresspalLogo.png')}
+          style={styles.profilePic}
+          PlaceholderContent={<ActivityIndicator />}
+        />
+      </View>
       {emailInUseError && <Text style={styles.error}>Email address is already in use</Text>}
       <View style={styles.inputContainer}>
         <TextInput
@@ -246,6 +251,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
+  },
+  profilePic: {
+    width: 100,
+    height: 100,
+  },
+  profilePicContainer: {
+    width: 100,
+    height: 100,
   },
 });
 

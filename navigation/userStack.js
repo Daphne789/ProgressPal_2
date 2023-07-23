@@ -2,16 +2,13 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './screens/HomeScreen';
 import CreateScreen from './screens/CreateScreen';
-import SyncEventsScreen from './screens/SyncEventsScreen';
 import AccountScreen from './screens/AccountScreen';
 import HomeIcon from '.././assets/icons/HomeIcon';
 import AddIcon from '.././assets/icons/AddIcon';
-import SyncIcon from '.././assets/icons/SyncIcon';
 import AccountIcon from '../assets/icons/AccountIcon';
 
 const homeName = 'Home';
 const createName = 'Create';
-const syncEventsName = 'Sync Events';
 const accountName = 'Account';
 const Tab = createBottomTabNavigator();
 
@@ -27,8 +24,6 @@ export default function UserStack() {
                 return <HomeIcon color={color} size={size} />;
               } else if (rn === createName) {
                 return <AddIcon color={color} size={size} />;
-              } else if (rn === syncEventsName) {
-                return <SyncIcon color={color} size={size} />;
               } else if (rn === accountName) {
                 return <AccountIcon color={color} size={size} />;
               }
@@ -41,7 +36,6 @@ export default function UserStack() {
         >
           <Tab.Screen name="Home" component={HomeScreen} />
           <Tab.Screen name="Create" component={CreateScreen} />
-          <Tab.Screen name="Sync Events" component={SyncEventsScreen} />
           <Tab.Screen name="Account" component={AccountScreen} />
         </Tab.Navigator>
   );
