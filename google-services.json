@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "154626395460",
+    "firebase_url": "https://progresspal-6c906-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "progresspal-6c906",
     "storage_bucket": "progresspal-6c906.appspot.com"
   },
@@ -14,7 +15,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "154626395460-ultaatb3knspklm07thuqavbkbovtngq.apps.googleusercontent.com",
+          "client_id": "154626395460-3aoii3vgnmfpm0h4off9glfbhddlrr0p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.orbital.progresspal",
+            "certificate_hash": "5d21acfe8550a7c37f0fef4d599a4261dccb1a3f"
+          }
+        },
+        {
+          "client_id": "154626395460-osjnca6qajeb1givski8pt2445k3t3u6.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,8 +36,15 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "154626395460-ultaatb3knspklm07thuqavbkbovtngq.apps.googleusercontent.com",
+              "client_id": "154626395460-osjnca6qajeb1givski8pt2445k3t3u6.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "154626395460-66qd8mbjg2hp6a9g57d63cuioqiv9bnc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.Mina933.progresspal"
+              }
             }
           ]
         }

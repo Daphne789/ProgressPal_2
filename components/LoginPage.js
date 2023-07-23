@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-
 
 const LoginPage = () => {
 
@@ -18,9 +17,8 @@ const LoginPage = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Login successful
-        // Add code here to handle the user credential or navigate to the homepage
         console.log('Login successful', userCredential);
-        // Navigate to the homepage
+        // Navigate to the HomePage
         navigation.navigate('HomePage');
       })
       .catch((error) => {
@@ -31,7 +29,7 @@ const LoginPage = () => {
         } else if (error.code === 'auth/wrong-password') {
           setPasswordError('Incorrect password');
         } else {
-          // Reset error messages for other errors
+          // Reset error messages
           setEmailError('');
           setPasswordError('');
           console.log('Login failed. Please try again.');
@@ -97,14 +95,14 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     marginVertical: 8,
-    width: '100%',
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 15,
-    paddingVertical: 8,
+    paddingVertical: 5,
     paddingHorizontal: 20,
+    width: 213,
   },
   button: {
     backgroundColor: '#00b3ff',
@@ -113,7 +111,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     marginVertical: 16,
-    width: 200,
+    width: 213,
     alignItems: 'center',
   },
   buttonText: {

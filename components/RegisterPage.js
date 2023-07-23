@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc, addDoc  } from 'firebase/firestore';
+import { auth, firestore, collection } from '../config/firebase';
 import axios from 'axios';
-
-const auth = getAuth();
 
 const RegisterPage = () => {
   const [username, setUsername] = useState('');
@@ -38,7 +38,16 @@ const RegisterPage = () => {
           if (isValidEmail) {
             createUserWithEmailAndPassword(auth, email, password)
               .then((userCredential) => {
+                const user = userCredential.user;
                 console.log('Registration successful', userCredential);
+
+                // Create a new document for the user in Firestore
+                const userDocRef = doc(firestore, 'users', user.uid);
+                setDoc(userDocRef, { username, email });
+
+                // Create a new collections for the user
+                const tasksCollectionRef1 = collection(firestore, 'tasks');
+
                 setIsLoading(false);
               })
               .catch((error) => {
@@ -66,14 +75,22 @@ const RegisterPage = () => {
 
   const validateUserEmail = async (email) => {
     try {
-      const encodedEmail = encodeURIComponent(email);
-      const apiKey = 'f706be8fae1162996f6bde50b9242a59';
-      const url = `http://apilayer.net/api/check?access_key=${apiKey}&email=${encodedEmail}`;
+      const apiKey = '1G7IVQXVEEG3NE5LSLSG'; // Replace with your MailboxValidator API key
+      const url = `https://api.mailboxvalidator.com/v1/validation/single?email=${encodeURIComponent(
+        email
+      )}&key=${apiKey}`;
+  
       const response = await axios.get(url);
-
-      const { format_valid, smtp_check } = response.data;
-
-      if (format_valid && smtp_check) {
+      const data = response.data;
+  
+      if (data.error) {
+        console.log('Email validation error:', data.error_message);
+        return false;
+      }
+  
+      console.log('Validation result:', data);
+  
+      if (data.status === 'True') {
         setEmailError('');
         return true;
       } else {
@@ -85,7 +102,7 @@ const RegisterPage = () => {
       throw error;
     }
   };
-
+  
   const renderUsernameError = () => {
     if (username.length >= 10) {
       return <Text style={styles.error}>Username can't be longer than 10 characters</Text>;
@@ -160,7 +177,7 @@ const RegisterPage = () => {
         />
         {renderPasswordError()}
       </View>
-      {isLoading ? ( 
+      {isLoading ? (
         <ActivityIndicator style={styles.loadingIndicator} size="small" color="#00b3ff" />
       ) : (
         <TouchableOpacity
@@ -180,29 +197,6 @@ const RegisterPage = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 120,
-    backgroundColor: '#f5f5f5',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  inputContainer: {
-    marginVertical: 8,
-    width: '100%',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 15,
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-  },
   button: {
     backgroundColor: '#00b3ff',
     color: '#000',
@@ -210,25 +204,48 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     marginVertical: 16,
-    width: 200,
+    width: 215,
     alignItems: 'center',
   },
   buttonText: {
     color: '#000',
     fontWeight: 'bold',
   },
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 120,
+    backgroundColor: '#f5f5f5',
+  },
   copy: {
     color: 'grey',
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
   },
   error: {
     color: 'red',
     marginTop: 5,
   },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 15,
+    paddingVertical: 5,
+    paddingHorizontal: 20,
+    width: 213,
+  },
+  inputContainer: {
+    marginVertical: 8,
+  },
   loadingIndicator: {
     marginTop: 10,
   },
-  disabledButton: {
-    backgroundColor: '#ccc',
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
   },
 });
 

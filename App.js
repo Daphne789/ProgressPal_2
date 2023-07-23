@@ -1,11 +1,21 @@
-const React = require('react');
 import './config/firebase';
-import RootNavigation from './navigation';
 import { registerRootComponent } from 'expo';
+import { Provider as PaperProvider } from 'react-native-paper';
+import { NavigationContainer } from '@react-navigation/native';
+import AuthStack from './navigation/authStack';
+import UserStack from './navigation/userStack';
+import { useAuthentication } from './utils/userAuthentication';
 
-export default function App() {
+function App() {
+  const { user } = useAuthentication();
+
   return (
-    <RootNavigation />
+    <NavigationContainer>
+      <PaperProvider>
+        {user ? <UserStack /> : <AuthStack />}
+      </PaperProvider>
+    </NavigationContainer>
   );
 }
+
 registerRootComponent(App);
