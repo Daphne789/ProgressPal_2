@@ -421,6 +421,12 @@ const HomeScreen = () => {
   const handleUpdateTask = async (taskId) => {
     try {
       if (taskId) {
+
+        if (!editTaskTitle.trim() && !editTaskDescription.trim()) {
+          alert('Please fill in either Title or Description)');
+          return;
+        }
+
         const user = auth.currentUser;
         const userTasksRef = collection(db, 'users', user.uid, 'tasks');
         const taskRef = doc(userTasksRef, taskId);
@@ -436,24 +442,33 @@ const HomeScreen = () => {
 
         console.log('Task updated for current user:', taskId);
 
-        // Fetch all users and update the task
-        const usersQuery = query(collection(db, 'users'));
-        const usersSnapshot = await getDocs(usersQuery);
+        // Check if the task is shared 
+        const taskDoc = await getDoc(taskRef);
+        if (taskDoc.exists()) {
+          const taskData = taskDoc.data();
+          const collaborators = taskData.collaborators || [];
 
-        const updateTasksPromises = usersSnapshot.docs.map(async (userDoc) => {
-          const otherUserTasksRef = collection(userDoc.ref, 'tasks');
-          const otherTaskRef = doc(otherUserTasksRef, taskId);
-          await updateDoc(otherTaskRef, {
-            title: editTaskTitle.trim(),
-            description: editTaskDescription.trim(),
-            selectedDate: editTaskSelectedDate ? editTaskSelectedDate.toISOString() : null,
-            selectedLabel: editTaskSelectedLabel,
-            timestamp
+          // If the task is shared, update the tasks for other users
+          const updateTasksPromises = collaborators.map(async (collaboratorEmail) => {
+            const usersQuery = query(collection(db, 'users'), where('email', '==', collaboratorEmail));
+            const usersSnapshot = await getDocs(usersQuery);
+
+            if (!usersSnapshot.empty) {
+              const collaboratorUserRef = usersSnapshot.docs[0].ref;
+              const collaboratorTaskRef = doc(collection(collaboratorUserRef, 'tasks'), taskId);
+              await updateDoc(collaboratorTaskRef, {
+                title: editTaskTitle.trim(),
+                description: editTaskDescription.trim(),
+                selectedDate: editTaskSelectedDate ? editTaskSelectedDate.toISOString() : null,
+                selectedLabel: editTaskSelectedLabel,
+                timestamp
+              });
+              console.log('Task updated for collaborator:', collaboratorEmail);
+            }
           });
+          await Promise.all(updateTasksPromises);
+        }
 
-          console.log('Task updated for user:', userDoc.id);
-        });
-        await Promise.all(updateTasksPromises);
         setEditModalVisible(false);
         await fetchTasks();
       }
@@ -461,6 +476,7 @@ const HomeScreen = () => {
       console.log('Error updating task:', error);
     }
   };
+
   const showDatePickerModal = () => {
     setShowDatePicker(true);
   };
@@ -485,12 +501,12 @@ const HomeScreen = () => {
         <View style={styles.editModalContainer}>
           <View style={styles.topContainer}>
             <TouchableOpacity onPress={showDatePickerModal}>
-              <CalendarIcon color={color} size={33}/>
+              <CalendarIcon color={color} size={33} />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setShowDropdown(true)}>
-              <TagIcon color={color} size={40}/>
+              <TagIcon color={color} size={40} />
             </TouchableOpacity>
-            <View style={{ flexDirection: 'column', justifyContent: 'space-between'}}>
+            <View style={{ flexDirection: 'column', justifyContent: 'space-between' }}>
               {editTaskSelectedDate ? (
                 <Text style={styles.deadline}>{moment(editTaskSelectedDate).format('MMM DD, YYYY HH:mm')}</Text>
               ) : (
