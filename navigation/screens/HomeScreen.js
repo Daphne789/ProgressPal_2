@@ -2,41 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput } from 'react-native';
 import { Checkbox, Snackbar, Menu } from 'react-native-paper';
 import { useRoute } from '@react-navigation/native';
+import { SearchBar } from 'react-native-elements';
+import { firestore, auth } from '../../config/firebase';
+import { collection, query, getDocs, deleteDoc, doc, orderBy, updateDoc, getDoc, setDoc, where } from 'firebase/firestore';
+import { format } from 'date-fns';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
-import { SearchBar } from 'react-native-elements';
+import * as Updates from 'expo-updates';
 import LabelIcon from '../../assets/icons/LabelIcon';
 import ReloadIcon from '../../assets/icons/ReloadIcon';
 import MenuIcon from '../../assets/icons/MenuIcon';
 import ShareIcon from '../../assets/icons/ShareIcon';
-import * as Updates from 'expo-updates';
-import { firestore, auth } from '../../config/firebase';
-import { collection, query, getDocs, deleteDoc, doc, orderBy, updateDoc, getFirestore, getDoc, setDoc, where, createdBy } from 'firebase/firestore';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { format } from 'date-fns';
 import CalendarIcon from '../../assets/icons/CalendarIcon';
 import TagIcon from '../../assets/icons/TagIcon';
 
-const color = '#000000';
-const size = 30;
 
 const HomeScreen = () => {
   const [tasks, setTasks] = useState([]);
-  const [showSnackbar, setShowSnackbar] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSnackbar, setShowSnackbar] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [currentTaskTitle, setCurrentTaskTitle] = useState('');
   const [inviteCollaboratorModalVisible, setInviteCollaboratorModalVisible] = useState(false);
   const [collaboratorEmails, setCollaboratorEmails] = useState('');
-  const [currentTaskTitle, setCurrentTaskTitle] = useState('');
   const [sharedTaskIds, setSharedTaskIds] = useState([]);
   const [collaborators, setCollaborators] = useState([]);
   const [collaboratorTasks, setCollaboratorTasks] = useState([]);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("");
   const [selectedLabel, setSelectedLabel] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [editTask, setEditTask] = useState(null);
@@ -46,6 +43,8 @@ const HomeScreen = () => {
   const [editTaskSelectedLabel, setEditTaskSelectedLabel] = useState(selectedLabel);
   const db = firestore;
   const route = useRoute();
+  const color = '#000000';
+  const size = 30;
 
   useEffect(() => {
     const checkPendingInvitations = async () => {
@@ -76,7 +75,7 @@ const HomeScreen = () => {
               );
               await AsyncStorage.setItem('pendingInvitations', JSON.stringify(updatedPendingInvitations));
             } else {
-              console.log('Inviter task not found:', taskId);
+              console.log('The inviter task is not found:', taskId);
             }
           }
         }
@@ -95,7 +94,7 @@ const HomeScreen = () => {
           setSharedTaskIds(parsedSharedTaskIds);
         }
       } catch (error) {
-        console.log('Error retrieving shared task IDs:', error);
+        console.log('Error retrieving shared task Ids:', error);
       }
     };
 
@@ -180,10 +179,6 @@ const HomeScreen = () => {
     }
   };
 
-  const clearSearchBar = () => {
-    fetchTasks();
-    setSearchQuery("");
-  };
 
   const handleSearch = (text) => {
     setSearchQuery(text);
@@ -301,24 +296,24 @@ const HomeScreen = () => {
           const usersSnapshot = await getDocs(usersQuery);
 
           if (!usersSnapshot.empty) {
-            // The collaborator's email exists, check if the task is already shared with them
+            // If the collaborator's email exists, then check if the task has already shared with the collaborator
             const collaboratorUserRef = usersSnapshot.docs[0].ref;
             const collaboratorTaskRef = doc(collection(collaboratorUserRef, 'tasks'), selectedTaskId);
             const collaboratorTaskDoc = await getDoc(collaboratorTaskRef);
 
             if (!collaboratorTaskDoc.exists()) {
-              // The task is not already shared with the collaborator, add it to their Firestore
-              // Add the task data along with the onlyEdit field
+              // If the task has not already shared with the collaborator,
+              // add the task data to their Firestore along with a new field called onlyEdit
               await setDoc(collaboratorTaskRef, { ...taskData, onlyEdit: true });
               console.log('Collaborators added:', collaboratorEmail);
             } else {
-              console.log('Task already shared with collaborators:', collaboratorEmail);
+              console.log('Task has already shared with collaborators:', collaboratorEmail);
             }
           } else {
             console.log('Collaborators email does not exist:', collaboratorEmail);
             console.log('Pending');
 
-            // Store the pending invitation using Async Storage
+            // If the collaborator's email doesn't exist, then store the pending invitation using Async Storage
             const pendingInvitation = {
               taskId: selectedTaskId,
               collaboratorEmail,
@@ -339,14 +334,14 @@ const HomeScreen = () => {
         const updatedSharedTaskIds = sharedTaskIds ? JSON.parse(sharedTaskIds) : [];
         updatedSharedTaskIds.push(selectedTaskId);
         await AsyncStorage.setItem('sharedTaskIds', JSON.stringify(updatedSharedTaskIds));
-        // Add collaborator emails to the task document's collaborators field
+        // Add collaborator emails under collaborators field of the the task doc
         const collaboratorsField = taskData.collaborators || [];
         const updatedCollaboratorsField = [...collaboratorsField, ...collaboratorEmailList];
         await updateDoc(taskRef, { collaborators: updatedCollaboratorsField });
         await fetchTasks();
         await fetchCollaboratorsEmail(selectedTaskId);
       } else {
-        console.log('Task not found');
+        console.log('The task is not found');
       }
     } catch (error) {
       console.log('Error inviting collaborators:', error);
@@ -373,7 +368,7 @@ const HomeScreen = () => {
 
         setCollaboratorTasks(tasksData);
       } else {
-        console.log('Task not found');
+        console.log('The task is not found');
       }
     } catch (error) {
       console.log('Error fetching collaborators data:', error);
@@ -414,7 +409,7 @@ const HomeScreen = () => {
     }
   };
 
-  const handleCancelUpdate = () => {
+  const handleCancelUpdateTask = () => {
     setEditModalVisible(false);
   };
 
@@ -539,7 +534,7 @@ const HomeScreen = () => {
           <TouchableOpacity style={styles.updateButton} onPress={() => handleUpdateTask(selectedTaskId)}>
             <Text style={styles.updateButtonText}>Update</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelButton} onPress={handleCancelUpdate}>
+          <TouchableOpacity style={styles.cancelButton} onPress={handleCancelUpdateTask}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
           <DateTimePickerModal
@@ -681,7 +676,7 @@ const HomeScreen = () => {
             )}
             <View style={styles.selectedContainer}>
               {task.selectedDate && (
-                <Text style={styles.dataText}>
+                <Text style={styles.dateText}>
                   {moment(task.selectedDate).format('MMM DD, YYYY HH:mm')}
                 </Text>
               )}
@@ -692,7 +687,7 @@ const HomeScreen = () => {
                 </View>
               )}
               {sharedTaskIds.includes(task.id) || collaborators.some((collaborator) => sharedTaskIds.includes(collaborator)) ? (
-                <ShareIcon style={styles.shareIconContainer} size={size} color={color} />
+                <ShareIcon color={color} size={size} />
               ) : null}
             </View>
           </View>
@@ -714,6 +709,63 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  menu: {
+    paddingLeft: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  itemContainer: {
+    marginBottom: 16,
+    padding: 16,
+    borderRadius: 8,
+    elevation: 2,
+    backgroundColor: '#F5F5F5',
+  },
+  rowContainer: {
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  leftContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 19,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  description: {
+    fontSize: 17,
+    fontWeight: '500',
+    marginTop: 5,
+    marginBottom: 10,
+  },
+  selectedContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dateText: {
+    fontSize: 15,
+    marginRight: 15,
+    color: 'black',
+  },
+  labelContainer: {
+    marginLeft: -2,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  labelText: {
+    fontSize: 15,
+    marginLeft: 3,
+    color: 'black',
+  },
   collaboratorEmail: {
     fontSize: 16,
     marginBottom: 5,
@@ -723,9 +775,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 4,
-    padding: 8,
     minHeight: 100,
     marginTop: 16,
+    padding: 8,
   },
   collaboratorsModal: {
     flex: 1,
@@ -734,10 +786,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
   },
   collaboratorsModalContent: {
-    backgroundColor: '#fff',
     padding: 16,
     borderRadius: 8,
     minWidth: 300,
+    backgroundColor: '#fff',
   },
   collaboratorsModalTitle: {
     fontSize: 18,
@@ -752,54 +804,16 @@ const styles = StyleSheet.create({
     color: 'blue',
   },
   closeCollaboratorsModalButton: {
-    backgroundColor: '#0b8043',
     padding: 12,
-    borderRadius: 4,
     marginTop: 16,
+    borderRadius: 4,
     alignItems: 'center',
+    backgroundColor: '#0b8043',
   },
   closeCollaboratorsModalButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  container: {
-    flex: 1,
-  },
-  dataText: {
-    fontSize: 15,
-    color: 'black',
-    marginRight: 15,
-  },
-  description: {
-    fontSize: 17,
-    fontWeight: '500',
-    marginTop: 5,
-    marginBottom: 10,
-  },
-  dropdown: {
-    height: 80,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 12,
-    paddingTop: 40,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
-    borderRadius: 12,
+    color: '#fff',
   },
   inviteCollaboratorModal: {
     flex: 1,
@@ -808,10 +822,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
   },
   inviteCollaboratorModalContent: {
-    backgroundColor: '#fff',
     padding: 16,
     borderRadius: 8,
     minWidth: 300,
+    backgroundColor: '#fff',
   },
   inviteCollaboratorModalTitle: {
     fontSize: 18,
@@ -820,103 +834,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   inviteCollaboratorButton: {
-    backgroundColor: '#FF6F00',
     padding: 12,
     borderRadius: 25,
     marginTop: 16,
     alignItems: 'center',
+    backgroundColor: '#FF6F00',
   },
   inviteCollaboratorButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
-  itemContainer: {
-    marginBottom: 16,
-    backgroundColor: '#F5F5F5',
-    padding: 16,
-    borderRadius: 8,
-    elevation: 2,
-  },
-  labelContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: -2,
-  },
-  labelText: {
-    fontSize: 15,
-    color: 'black',
-    marginLeft: 3,
-  },
-  leftContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loadingText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  menu: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingLeft: 20,
-  },
-  placeholderStyle: {
-    fontSize: 16,
-  },
-  rowContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  selectedContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  selectedStyle: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 20,
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    marginTop: 10,
-    marginRight: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 2,
-    shadowRadius: 1.9,
-    elevation: 2,
-  },
-  selectedTextStyle: {
-    fontSize: 20,
-  },
-  textSelectedStyle: {
-    marginRight: 5,
-    fontSize: 16,
-  },
-  title: {
-    fontSize: 19,
-    fontWeight: 'bold',
-    marginLeft: 10,
-  },
   topContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
     marginBottom: 16,
     marginTop: 35,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
   },
   deadline: {
     fontSize: 16,
@@ -926,7 +859,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     alignItems: 'flex-end',
     color: 'blue',
-
   },
   titleInput: {
     borderWidth: 1,
@@ -953,41 +885,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: 35,
   },
   updateButton: {
-    backgroundColor: 'blue',
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginTop: 16,
     alignItems: 'center',
+    backgroundColor: 'blue',
   },
   updateButtonText: {
-    color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+    color: 'white',
   },
   cancelButton: {
-    backgroundColor: '#999999',
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginTop: 8,
     alignItems: 'center',
+    backgroundColor: '#999999',
   },
   cancelButtonText: {
-    color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  dropdownContent: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 16,
+    color: 'white',
   },
   dropdownModal: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  dropdownContent: {
+    borderRadius: 8,
+    padding: 16,
+    backgroundColor: 'white',
   },
   optionText: {
     fontSize: 16,

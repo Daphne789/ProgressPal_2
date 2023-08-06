@@ -9,11 +9,11 @@ export default function AccountScreen() {
   const navigation = useNavigation();
   const [showError, setShowError] = useState(false);
   const [currentUsername, setCurrentUsername] = useState('');
-  const [usernameModalVisible, setUsernameModalVisible] = useState(false);
+  const [usernameModal, setUsernameModal] = useState(false);
   const [tempUsername, setTempUsername] = useState('');
 
   useEffect(() => {
-    // Fetch the username from Firestore
+    // Get the username from Firebase Firestore
     const auth = getAuth();
     const currentUser = auth.currentUser;
     if (currentUser) {
@@ -21,13 +21,12 @@ export default function AccountScreen() {
       getDoc(userDocRef)
         .then((docSnapshot) => {
           if (docSnapshot.exists()) {
-            // If the document exists, update the username
+            // If the doc exists, update the username
             const userData = docSnapshot.data();
             setCurrentUsername(userData.username);
             console.log('Current username:', userData.username);
           } else {
-            // Handle the case where the user document doesn't exist (optional)
-            console.log('User document does not exist');
+            console.log('User document can not be found');
           }
         })
         .catch((error) => {
@@ -41,7 +40,7 @@ export default function AccountScreen() {
     signOut(auth)
       .then(() => {
         console.log('Logout successful');
-        // Navigate to the welcome page or any desired page after logout
+        // Navigate to the Welcome Page 
         navigation.navigate('WelcomePage');
       })
       .catch((error) => {
@@ -49,7 +48,7 @@ export default function AccountScreen() {
       });
   };
 
-  const dismissErrorMessage = () => {
+  const hideErrorMessage = () => {
     setShowError(false);
   };
 
@@ -62,14 +61,14 @@ export default function AccountScreen() {
 
   const handleChangeUsername = async () => {
     try {
-      // Update the new username of the user in Firestore
+      // Update the user's current username
       const auth = getAuth();
       const currentUser = auth.currentUser;
 
       if (currentUser) {
         const userDocRef = doc(firestore, 'users', currentUser.uid);
         await updateDoc(userDocRef, { username: tempUsername });
-        setUsernameModalVisible(false);
+        setUsernameModal(false);
         setCurrentUsername(tempUsername);
       }
     } catch (error) {
@@ -77,13 +76,13 @@ export default function AccountScreen() {
     }
   };
 
-  const handleOpenChangeUsername = () => {
+  const handleShowChangeUsername = () => {
     setTempUsername(currentUsername);
-    setUsernameModalVisible(true);
+    setUsernameModal(true);
   };
 
-  const handleCancelChangeUsername = () => {
-    setUsernameModalVisible(false);
+  const handleDismissChangeUsername = () => {
+    setUsernameModal(false);
   };
 
   return (
@@ -99,28 +98,28 @@ export default function AccountScreen() {
         <Text style={styles.username}>{currentUsername}</Text>
       </View>
       <Text style={styles.title}>Profile</Text>
-      <Text style={styles.functionality} onPress={handleOpenChangeUsername}>Change username</Text>
+      <Text style={styles.functionality} onPress={handleShowChangeUsername}>Change username</Text>
       <View style={styles.lineStyle} />
       <TouchableOpacity style={styles.button} onPress={handleLogout}>
         <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
 
       <Modal
-        visible={usernameModalVisible}
+        visible={usernameModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setUsernameModalVisible(false)}
+        onRequestClose={() => setUsernameModal(false)}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             {renderUsernameError()}
             <TextInput
               style={styles.textInput}
-              placeholder="Please type in new username"
+              placeholder="Please fill in your new username"
               autoFocus
               maxLength={10}
               onChangeText={setTempUsername}
-              onFocus={dismissErrorMessage}
+              onFocus={hideErrorMessage}
               value={tempUsername}
             />
             <TouchableOpacity
@@ -129,7 +128,7 @@ export default function AccountScreen() {
             >
               <Text style={styles.submitButtonText}>Submit</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={handleCancelChangeUsername}>
+            <TouchableOpacity style={styles.cancelButton} onPress={handleDismissChangeUsername}>
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -140,26 +139,40 @@ export default function AccountScreen() {
 }
 
 const styles = StyleSheet.create({
-  button: {
-    backgroundColor: '#ff0000',
-    paddingVertical: 12,
-    paddingHorizontal: 7,
-    borderRadius: 60,
-    marginTop: 10,
-    marginLeft: 10,
-    marginRight: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: {
-    color: '#000000',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    fontSize: 15,
-  },
   error: {
-    color: 'red',
     marginTop: 5,
+    color: 'red',
+  },
+  container: {
+    flex: 1,
+  },
+  topContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profilePicContainer: {
+    width: 160,
+    height: 160,
+    marginTop: 20,
+    borderRadius: 80,
+    overflow: 'hidden',
+  },
+  profilePic: {
+    width: 160,
+    height: 160,
+  },
+  username: {
+    fontSize: 22,
+    fontWeight: '450',
+    marginTop: 10,
+    marginHorizontal: 10,
+    textAlign: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2196f3',
+    padding: 10,
   },
   functionality: {
     fontSize: 18,
@@ -175,36 +188,22 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     margin: 10,
   },
-  profilePic: {
-    width: 160,
-    height: 160,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2196f3',
-    padding: 10,
-  },
-  username: {
-    fontSize: 22,
-    fontWeight: '450',
-    textAlign: 'center',
+  button: {
+    backgroundColor: '#ff0000',
+    paddingVertical: 12,
+    paddingHorizontal: 7,
     marginTop: 10,
-    marginHorizontal: 10,
-  },
-  container: {
-    flex: 1,
-  },
-  topContainer: {
-    justifyContent: 'center',
+    marginLeft: 10,
+    marginRight: 10,
+    borderRadius: 60,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  profilePicContainer: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    overflow: 'hidden',
-    marginTop: 20,
+  buttonText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#000000',
   },
   modalContainer: {
     flex: 1,
@@ -212,18 +211,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
   },
   modalContent: {
-    backgroundColor: '#fff',
     padding: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    backgroundColor: '#fff',
   },
   textInput: {
     borderWidth: 1,
     borderColor: '#000',
+    borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 5,
     marginBottom: 10,
-    borderRadius: 8,
   },
   submitButton: {
     borderWidth: 2,
@@ -231,15 +230,15 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
+    marginBottom: 10,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
   },
   submitButtonText: {
-    color: '#800080',
     fontWeight: 'bold',
     fontSize: 16,
+    color: '#800080',
   },
   cancelButton: {
     borderWidth: 2,
@@ -252,8 +251,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cancelButtonText: {
-    color: '#ff0000', // Red color
     fontWeight: 'bold',
     fontSize: 16,
+    color: '#ff0000',
   },
 });

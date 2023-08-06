@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform, Modal, KeyboardAvoidingView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { useNavigation } from '@react-navigation/native';
-import moment from 'moment';
-import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
+import { collection, addDoc, doc } from 'firebase/firestore';
 import { firestore, auth } from '../../config/firebase';
-import * as Updates from 'expo-updates';
 import { format } from 'date-fns';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import moment from 'moment';
+import * as Updates from 'expo-updates';
 import CalendarIcon from '../../assets/icons/CalendarIcon';
 import TagIcon from '../../assets/icons/TagIcon';
 
 export default function CreateScreen() {
+  const navigation = useNavigation();
+  const color = '#000000';
+  const db = firestore;
+  const user = auth.currentUser;
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
@@ -19,11 +24,7 @@ export default function CreateScreen() {
   const [selectedOption, setSelectedOption] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState(null);
-  const navigation = useNavigation();
   const [taskId, setTaskId] = useState('');
-  const color = '#000000';
-  const db = firestore;
-  const user = auth.currentUser;
 
   const handleOptionSelect = (option) => {
     setSelectedOption(option);
@@ -188,18 +189,14 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-  label: {
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
   scrollContainer: {
     flexGrow: 1,
   },
   topContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
     marginBottom: 16,
     marginTop: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
   },
   icon: {
     marginLeft: 90,
@@ -208,50 +205,56 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 50,
   },
+  selectedLabel: {
+    fontSize: 16,
+    marginLeft: 'auto',
+    marginRight: 5,
+    color: 'blue',
+  },
   titleInput: {
+    fontSize: 16,
     borderWidth: 1,
     borderColor: 'grey',
     borderRadius: 8,
     padding: 8,
     marginBottom: 16,
-    fontSize: 16,
     backgroundColor: '#faebd7'
   },
   descriptionInput: {
+    fontSize: 16,
+    height: 160,
     borderWidth: 1,
     borderColor: 'grey',
     borderRadius: 8,
     padding: 8,
     marginBottom: 16,
-    fontSize: 16,
-    height: 160,
     textAlignVertical: 'top',
     backgroundColor: '#faebd7'
   },
   saveButton: {
-    backgroundColor: '#0b8043',
     borderRadius: 20,
     padding: 10,
-    alignItems: 'center',
     marginBottom: Platform.OS === 'ios' ? 16 : 0,
     elevation: 5,
+    alignItems: 'center',
+    backgroundColor: '#0b8043',
   },
   saveButtonText: {
-    color: 'white',
     fontSize: 20,
     fontWeight: 'bold',
     marginLeft: 3,
+    color: 'white',
   },
   dropdownModal: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   dropdownContent: {
-    backgroundColor: 'white',
     borderRadius: 8,
     padding: 16,
+    backgroundColor: 'white',
   },
   option: {
     paddingVertical: 8,
@@ -265,12 +268,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 8,
     color: 'black',
-  },
-  selectedLabel: {
-    fontSize: 16,
-    marginLeft: 'auto',
-    marginRight: 5,
-    color: 'blue',
   },
 });
 

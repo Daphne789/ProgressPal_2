@@ -32,9 +32,9 @@ const WelcomePage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
     backgroundColor: '#f5f5f5',
   },
   title: {
@@ -47,18 +47,18 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#00b3ff',
+    width: 200,
     borderRadius: 300,
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginTop: 10,
     marginBottom: 2,
-    width: 200,
+    backgroundColor: '#00b3ff',
   },
   buttonText: {
+    fontSize: 16,
     color: '#000',
     textAlign: 'center',
-    fontSize: 16,
   },
 });
 

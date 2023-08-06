@@ -11,7 +11,7 @@ export function useAuthentication() {
         // User is signed in
         setUser(user);
       } else {
-        // User is signed out
+        // User is logged out
         setUser(undefined);
       }
     });

@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from 'react-native';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, addDoc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import { auth, firestore, collection } from '../config/firebase';
 import axios from 'axios';
 
 const RegisterPage = () => {
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [emailInUseError, setEmailInUseError] = useState(false);
   const [showError, setShowError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [emailInUseError, setEmailInUseError] = useState(false);
 
   const validateEmail = () => {
     const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
@@ -32,7 +32,6 @@ const RegisterPage = () => {
       if (isEmailValid && password.length >= 8) {
         try {
           setIsLoading(true);
-
           const isValidEmail = await validateUserEmail(email);
 
           if (isValidEmail) {
@@ -41,12 +40,12 @@ const RegisterPage = () => {
                 const user = userCredential.user;
                 console.log('Registration successful', userCredential);
 
-                // Create a new document for the user in Firestore
+                // Create a new doc for the user in Firebase Firestore
                 const userDocRef = doc(firestore, 'users', user.uid);
                 setDoc(userDocRef, { username, email });
 
-                // Create a new collections for the user
-                const tasksCollectionRef1 = collection(firestore, 'tasks');
+                // Create a new collection called tasks for a new user
+                const tasksCollectionRef = collection(firestore, 'tasks');
 
                 setIsLoading(false);
               })
@@ -62,20 +61,19 @@ const RegisterPage = () => {
             setIsLoading(false);
           }
         } catch (error) {
-          // Error occurred while validating email
+          // Error while validating email
           console.log('Email validation error:', error);
           setIsLoading(false);
         }
       }
     } else {
-      // Display error message for incomplete fields
       setShowError(true);
     }
   };
 
   const validateUserEmail = async (email) => {
     try {
-      const apiKey = '1G7IVQXVEEG3NE5LSLSG'; // Replace with your MailboxValidator API key
+      const apiKey = '1G7IVQXVEEG3NE5LSLSG'; // MailboxValidator API key
       const url = `https://api.mailboxvalidator.com/v1/validation/single?email=${encodeURIComponent(
         email
       )}&key=${apiKey}`;
@@ -183,7 +181,7 @@ const RegisterPage = () => {
         {renderPasswordError()}
       </View>
       {isLoading ? (
-        <ActivityIndicator style={styles.loadingIndicator} size="small" color="#00b3ff" />
+        <ActivityIndicator style={styles.loading} size="small" color="#00b3ff" />
       ) : (
         <TouchableOpacity
           style={[styles.button, password.length < 8 && styles.disabledButton]}
@@ -202,63 +200,58 @@ const RegisterPage = () => {
 };
 
 const styles = StyleSheet.create({
-  button: {
-    backgroundColor: '#00b3ff',
-    color: '#000',
-    borderRadius: 300,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginVertical: 16,
-    width: 215,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#000',
-    fontWeight: 'bold',
-  },
   container: {
     flex: 1,
+    padding: 120,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 120,
     backgroundColor: '#f5f5f5',
   },
-  copy: {
-    color: 'grey',
-  },
-  disabledButton: {
-    backgroundColor: '#ccc',
-  },
-  error: {
-    color: 'red',
-    marginTop: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 15,
-    paddingVertical: 5,
-    paddingHorizontal: 20,
-    width: 213,
-  },
-  inputContainer: {
-    marginVertical: 8,
-  },
-  loadingIndicator: {
-    marginTop: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
+  profilePicContainer: {
+    width: 100,
+    height: 100,
   },
   profilePic: {
     width: 100,
     height: 100,
   },
-  profilePicContainer: {
-    width: 100,
-    height: 100,
+  error: {
+    marginTop: 5,
+    color: 'red',
+  },
+  inputContainer: {
+    marginVertical: 8,
+  },
+  input: {
+    width: 213,
+    borderWidth: 1,
+    borderRadius: 15,
+    borderColor: '#ccc',
+    paddingVertical: 5,
+    paddingHorizontal: 20,
+  },
+  loading: {
+    marginTop: 10,
+  },
+  button: {
+    width: 215,
+    borderRadius: 300,
+    backgroundColor: '#00b3ff',
+    color: '#000',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginVertical: 16,
+    alignItems: 'center',
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
+  },
+  buttonText: {
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  copy: {
+    color: 'grey',
   },
 });
 
